@@ -5,6 +5,7 @@ import telegram
 from order import redeem, order_callback
 from wallet import wallet
 from recent_transactions import recent_transactions
+from orderv2 import redeem2, order_callback2gi
 
 
 Rules = """ 
@@ -50,6 +51,7 @@ def main():
     #Command handlers
     dp.add_handler(CommandHandler("start", Start)) 
     dp.add_handler(CommandHandler("redeem", Redeem)) 
+    dp.add_handler(CommandHandler("redeem2", Redeem2))
     dp.add_handler(CommandHandler("wallet", Wallet)) 
     dp.add_handler(CommandHandler("recent_transactions", Recent_Transactions))
 
