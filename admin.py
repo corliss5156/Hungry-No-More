@@ -5,4 +5,3 @@ from settings import database
 def create_new_user(username, credits): 
     database.users.insert_one({'user': username, 'credits': credits})
 
-create_new_user('marcuswongjw', 100)

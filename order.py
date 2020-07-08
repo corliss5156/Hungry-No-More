@@ -1,49 +1,92 @@
 import telegram 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler
+from telegram import ReplyKeyboardMarkup
 from pymongo import MongoClient, TEXT, DESCENDING
 from datetime import datetime, timedelta
 import re 
 from settings import database
+import json
+
+bot = telegram.Bot(token = "1342752441:AAH12-Q914sRWKRWMfOv6g_1_gVtIHXL9L0")
+with open('Menu_items.json') as json_file: 
+    DATA = json.load(json_file)
+
+with open('Sellers.json') as json_file: 
+    SELLERS = json.load(json_file)
+SHOPS, MENU, RECORD  = range(0,3)
+
+def Reply_keyboard(store_name): 
+    reply_keyboard = [[]]
+    for item in DATA[store_name]['Products']:        
+        menu_item = item['Item'] + ': $' + str(item['Price'])
+        reply_keyboard[0].append(menu_item)   
+    return reply_keyboard
 
 
-### Redeem function 
-def redeem(bot,update): 
+def order(update, context): 
+    reply_keyboard = [['Pizza', 'Chinese']]
+    update.message.reply_text('Choose store:', reply_markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return SHOPS
+
+def shops(update, context): 
+    reply_keyboard = Reply_keyboard(update.message.text)
+    context.chat_data['store'] = update.message.text
+    update.message.reply_text('Chosen store is ' + update.message.text  +'.\n Please choose an item from the menu.', reply_markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True))
+    return MENU
+
+def menu(update, context): 
+    reply_keyboard = [['Confirm', 'Cancel']]
+    text= re.split('[:]',update.message.text)
+    print(update)
+    print(type(update))
+    print(context)
+    print(type(context))
+    try: 
+        context.chat_data['order'] = text[0]
+        context.chat_data['credits'] = text[-1]
+        print(context.chat_data)
+        update.message.reply_text('Chosen menu item is '+ text[0] + ' for ' + text[-1], reply_markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    except (IndexError, ValueError):
+        print(IndexError, ValueError) 
+    #Store order 
     
-    button_list=[
-        telegram.InlineKeyboardButton('Cheese Pizza',callback_data='Cheese_Pizza'),
-        telegram.InlineKeyboardButton('Mushroom Pizza',callback_data='Mushroom_Pizza'),
-        telegram.InlineKeyboardButton('Chicken Rice',callback_data='Chicken_Rice'),
-        telegram.InlineKeyboardButton('Noodles',callback_data='Noodles')
-    ]
-    reply_markup=telegram.InlineKeyboardMarkup(build_menu(button_list,n_cols=1))
-    bot.send_message(chat_id=update.message.chat_id, text='Choose from the following',reply_markup=reply_markup)
+    return RECORD
 
-def build_menu(buttons,n_cols,header_buttons=None,footer_buttons=None):
-    menu = [buttons[i:i + n_cols] for i in range(0, len(buttons), n_cols)]
-    if header_buttons:
-        menu.insert(0, header_buttons)
-    if footer_buttons:
-        menu.append(footer_buttons)
-    return menu   
+def record(update, context): 
+    if update.message.text == "Cancel": 
+        return ConversationHandler.END
+        
+    else: 
+        user = update.message.chat.username
+        order_item = context.chat_data['order']
+        store = context.chat_data['store']
+        Credits = context.chat_data['credits']
+        credit = re.split('[$]', Credits)
+        credits = credit[-1]
+        now  = datetime.now()
+        date = now.strftime("%d/%m/%Y %H:%M:%S")
+        update.message.reply_text("Order details: \n"+ "Item: " + order_item + "\nStore: " + store + "\nPrice: " + credits + "\nOrder time: " + date)
+        try: 
+            record_transaction(user, int(credits), order_item, date)
+            deduct_credits(user, int(credits))
+            print("success")
+            try: 
+                seller(user, store,order_item, date)
+            except: 
+                print("Transaction did not pass through")
+        except  : 
+            print("error occured")
+        return ConversationHandler.END
+        # order_item = bot.user_data[update.message.chat.username]
 
-def order_callback(bot,update): 
-    username = update.callback_query.message.chat.username
-    item = update.callback_query.data
-    menu_item = re.sub('_', ' ', item)
-    now = datetime.now()
-    date = now.strftime("%d/%m/%Y %H:%M:%S")
-    
-    bot.send_message(chat_id = update.callback_query.message.chat.id, text = "You ordered "+ menu_item + " at " + date)
-    if item == 'Cheese_Pizza': 
-        credits = 4
-    elif item == 'Mushroom_Pizza': 
-        credits = 10
-    elif item == 'Chicken_Rice': 
-        credits = 3
-    elif item == 'Noodles': 
-        credits = 5
-    deduct_credits(username, credits)
-    record_transaction(username, credits, menu_item, date)
+        # update.message.reply_text("Order details:" + '\ Item: ' + menu_ti)
+        
+def seller(buyer, seller, item, date): 
+    seller_id = SELLERS[seller]["chat_id"]
+    bot.send_message(chat_id = seller_id, text = "Incoming order details: \n" + "Customer: " + buyer + "\nItem: " + item + "\nDate: "+ date)
+
+
+
 
 def record_transaction(username, credits, menu_item, date): 
     database.transactions.insert({'user': username, 'transaction': - credits, 'menu_item': menu_item, 'date': date})
@@ -52,3 +95,5 @@ def record_transaction(username, credits, menu_item, date):
 
 def deduct_credits(user, credits): 
     database.users.update({'user': user},{'$inc':{'credits': -credits}})
+    
+    

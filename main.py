@@ -1,17 +1,23 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
+from telegram import ReplyKeyboardMarkup
 from pymongo import MongoClient
 import telegram
-
-from order import redeem, order_callback
+from order import order, shops, menu, record 
 from wallet import wallet
 from recent_transactions import recent_transactions
-from orderv2 import redeem2, order_callback2gi
+import logging
+
+#Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 Rules = """ 
 Commands: 
 /start      starts the bot 
-/redeem     redeem credits 
+/order      order 
 /wallet     check balance in wallet
 /recent_transactions    check last 5 transactions from wallet 
 """ 
@@ -20,43 +26,41 @@ client = MongoClient("""mongodb+srv://Admin:admin123@cluster0-phjwg.mongodb.net/
 
 database = client['Cluster0']
 
-
+SHOPS, MENU,RECORD = range(0,3)
 
 
 #Start command
-def Start(bot, update):
+def Start(update, context):
     update.message.reply_text(Rules)
-
-
-#Redeem command
-def Redeem(bot,update): 
-    redeem(bot,update)
-
-def Order_callback(bot,update): 
-    order_callback(bot, update)
-
-#Wallet command
-def Wallet(bot, update):
-    wallet(bot,update)
-
-#Recent Transactions command 
-def Recent_Transactions(bot, update): 
-    recent_transactions(bot,update)
 
 ### Main function
 def main(): 
-    updater = Updater('1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA')
+    updater = Updater('1342752441:AAH12-Q914sRWKRWMfOv6g_1_gVtIHXL9L0', use_context=True)
     dp = updater.dispatcher
 
-    #Command handlers
-    dp.add_handler(CommandHandler("start", Start)) 
-    dp.add_handler(CommandHandler("redeem", Redeem)) 
-    dp.add_handler(CommandHandler("redeem2", Redeem2))
-    dp.add_handler(CommandHandler("wallet", Wallet)) 
-    dp.add_handler(CommandHandler("recent_transactions", Recent_Transactions))
-
     #Callback handlers
-    dp.add_handler(telegram.ext.CallbackQueryHandler(Order_callback))
+    order_handler = ConversationHandler(
+    entry_points = [CommandHandler('order', order)], 
+    states = {
+        SHOPS: [MessageHandler(Filters.regex('^(Pizza|Chinese)$'),shops)], 
+        MENU: [MessageHandler(Filters.regex('^'), menu)], 
+        RECORD: [MessageHandler(Filters.regex('^'), record)]
+        }, fallbacks = [CommandHandler('cancel', Start)])
+
+    #Command handlers
+    dp.add_handler(CommandHandler("cancel", Start)) 
+    dp.add_handler(order_handler)
+
+    
+    
+   
+    dp.add_handler(CommandHandler('Start', Start))
+    dp.add_handler(CommandHandler("wallet", wallet)) 
+    dp.add_handler(CommandHandler("recent_transactions", recent_transactions))
+
+
+
+   
 
     updater.start_polling()
     updater.idle()
@@ -72,4 +76,6 @@ if __name__ == '__main__':
 
 ##How much each menu item costs
 
-##Ordering with confirm button 
+##Ordering with confirm button
+# 
+

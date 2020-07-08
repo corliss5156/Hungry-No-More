@@ -1,0 +1,27 @@
+{
+    "Pizza": {
+        "Products": [
+            {
+                "Item": "Cheese pizza", 
+                "Price": 10 
+            }, 
+            {
+                "Item": "Mushroom pizza", 
+                "Price": 8
+            }
+        ]
+    }, 
+    "Chinese": {
+        "Products": [
+            {
+                "Item": "Noodles", 
+                "Price": 4
+            }, 
+            {
+                "Item": "Chicken rice", 
+                "Price": 3
+            }
+        ]
+    }
+
+}
