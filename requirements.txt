@@ -1,0 +1,5 @@
+INSTALL THESE BEFORE RUNNING:
+
+pip install python-telegram-bot
+pip install pymongo
+pip install pymongo[srv]

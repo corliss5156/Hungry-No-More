@@ -13,7 +13,8 @@ def redeem(bot,update):
         telegram.InlineKeyboardButton('Cheese Pizza',callback_data='Cheese_Pizza'),
         telegram.InlineKeyboardButton('Mushroom Pizza',callback_data='Mushroom_Pizza'),
         telegram.InlineKeyboardButton('Chicken Rice',callback_data='Chicken_Rice'),
-        telegram.InlineKeyboardButton('Noodles',callback_data='Noodles')
+        telegram.InlineKeyboardButton('Noodles',callback_data='Noodles'),
+        telegram.InlineKeyboardButton('Wanton Noodles',callback_data='Wanton Noodles')
     ]
     reply_markup=telegram.InlineKeyboardMarkup(build_menu(button_list,n_cols=1))
     bot.send_message(chat_id=update.message.chat_id, text='Choose from the following',reply_markup=reply_markup)
@@ -42,6 +43,8 @@ def order_callback(bot,update):
         credits = 3
     elif item == 'Noodles': 
         credits = 5
+    elif item == 'Wanton Noodles': 
+        credits = 2
     deduct_credits(username, credits)
     record_transaction(username, credits, menu_item, date)
 
