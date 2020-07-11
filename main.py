@@ -1,8 +1,8 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler, MessageHandler, Filters
 from pymongo import MongoClient
 import telegram
 
-from order import redeem, order_callback
+from order import stall, order_callback,item
 from wallet import wallet
 from recent_transactions import recent_transactions
 
@@ -19,7 +19,15 @@ client = MongoClient("""mongodb+srv://Admin:admin123@cluster0-phjwg.mongodb.net/
 
 database = client['Cluster0']
 
+import logging
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+ 
+logger = logging.getLogger(__name__)
 
+### STATES
+MENU, TRANSACTION = range(2)
 
 
 #Start command
@@ -28,11 +36,18 @@ def Start(bot, update):
 
 
 #Redeem command
-def Redeem(bot,update): 
-    redeem(bot,update)
+def Redeem(update,context): 
+    stall(update,context)
+    return MENU
 
-def Order_callback(bot,update): 
-    order_callback(bot, update)
+def Order_callback(update,context): 
+    order_callback(update,context)
+    return ConversationHandler.END
+
+
+def Item(update,context):
+    item(update,context)
+    return TRANSACTION
 
 #Wallet command
 def Wallet(bot, update):
@@ -44,7 +59,7 @@ def Recent_Transactions(bot, update):
 
 ### Main function
 def main(): 
-    updater = Updater('1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA')
+    updater = Updater('1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA', use_context=True)
     dp = updater.dispatcher
 
     #Command handlers
@@ -53,8 +68,18 @@ def main():
     dp.add_handler(CommandHandler("wallet", Wallet)) 
     dp.add_handler(CommandHandler("recent_transactions", Recent_Transactions))
 
-    #Callback handlers
-    dp.add_handler(telegram.ext.CallbackQueryHandler(Order_callback))
+    #Conversation Handler
+    conv_handler = ConversationHandler(
+    entry_points=[CommandHandler('redeem', Redeem)],
+    states={
+        MENU: [MessageHandler(Filters.regex('^'),Item)],
+        TRANSACTION: [MessageHandler(Filters.regex('^'),CallbackQueryHandler)]
+    },
+    fallbacks=[CommandHandler('start', Start)],
+    per_message = True
+    )
+
+    dp.add_handler(conv_handler)
 
     updater.start_polling()
     updater.idle()
