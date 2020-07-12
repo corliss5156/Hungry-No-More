@@ -33,9 +33,9 @@ def build_menu(buttons,n_cols,header_buttons=None,footer_buttons=None):
     return menu   
 
 def item(update,context):
-    update.message.reply_text('Maybe I can visit you sometime! '
-                              'At last, tell me something about yourself.')
-    item = update.message.text
+    # update.message.reply_text('Maybe I can visit you sometime! '
+    #                           'At last, tell me something about yourself.')
+    item = update.callback_query.data
     shopList = database['shops'].find({'name': item})
     button_list = []
     for shop in (shopList):

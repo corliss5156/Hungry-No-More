@@ -31,7 +31,7 @@ MENU, TRANSACTION = range(2)
 
 
 #Start command
-def Start(bot, update):
+def Start(update,context):
     update.message.reply_text(Rules)
 
 
@@ -50,12 +50,12 @@ def Item(update,context):
     return TRANSACTION
 
 #Wallet command
-def Wallet(bot, update):
-    wallet(bot,update)
+def Wallet(update,context):
+    wallet(update,context)
 
 #Recent Transactions command 
-def Recent_Transactions(bot, update): 
-    recent_transactions(bot,update)
+def Recent_Transactions(update,context): 
+    recent_transactions(update,context)
 
 ### Main function
 def main(): 
@@ -68,18 +68,18 @@ def main():
     dp.add_handler(CommandHandler("wallet", Wallet)) 
     dp.add_handler(CommandHandler("recent_transactions", Recent_Transactions))
 
-    #Conversation Handler
-    conv_handler = ConversationHandler(
-    entry_points=[CommandHandler('redeem', Redeem)],
-    states={
-        MENU: [MessageHandler(Filters.regex('^'),Item)],
-        TRANSACTION: [MessageHandler(Filters.regex('^'),CallbackQueryHandler)]
-    },
-    fallbacks=[CommandHandler('start', Start)],
-    per_message = True
-    )
+    # #Conversation Handler
+    # conv_handler = ConversationHandler(
+    # entry_points=[CommandHandler('redeem', Redeem)],
+    # states={
+    #     MENU: [MessageHandler(Filters.regex('^'),Item)],
+    #     TRANSACTION: [MessageHandler(Filters.regex('^'),CallbackQueryHandler)]
+    # },
+    # fallbacks=[CommandHandler('start', Start)],
+    # per_message = True
+    # )
 
-    dp.add_handler(conv_handler)
+    dp.add_handler(CallbackQueryHandler(Item))
 
     updater.start_polling()
     updater.idle()
