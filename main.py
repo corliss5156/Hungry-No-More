@@ -40,14 +40,13 @@ def Redeem(update,context):
     stall(update,context)
     return MENU
 
-def Order_callback(update,context): 
-    order_callback(update,context)
-    return ConversationHandler.END
-
-
 def Item(update,context):
     item(update,context)
     return TRANSACTION
+
+def Order_callback(update,context): 
+    order_callback(update,context)
+    return ConversationHandler.END
 
 #Wallet command
 def Wallet(update,context):
@@ -68,18 +67,19 @@ def main():
     dp.add_handler(CommandHandler("wallet", Wallet)) 
     dp.add_handler(CommandHandler("recent_transactions", Recent_Transactions))
 
-    # #Conversation Handler
+    ##Conversation Handler
     # conv_handler = ConversationHandler(
     # entry_points=[CommandHandler('redeem', Redeem)],
     # states={
-    #     MENU: [MessageHandler(Filters.regex('^'),Item)],
-    #     TRANSACTION: [MessageHandler(Filters.regex('^'),CallbackQueryHandler)]
+    #     MENU: [MessageHandler(Filters.text,Item)],
+    #     TRANSACTION: [MessageHandler(Filters.text,Order_callback)]
     # },
     # fallbacks=[CommandHandler('start', Start)],
     # per_message = True
     # )
 
     dp.add_handler(CallbackQueryHandler(Item))
+    dp.add_handler(CallbackQueryHandler(Order_callback))
 
     updater.start_polling()
     updater.idle()
