@@ -1,5 +1,7 @@
 {
     "Pizza": {
+        "username": "corlaze", 
+        "chatid" : 44804829,
         "Products": [
             {
                 "Item": "Cheese pizza", 
@@ -12,6 +14,8 @@
         ]
     }, 
     "Chinese": {
+        "username": "test", 
+        "chatid": "486455062",
         "Products": [
             {
                 "Item": "Noodles", 

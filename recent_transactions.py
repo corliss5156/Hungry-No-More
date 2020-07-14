@@ -8,5 +8,4 @@ def recent_transactions(update,context):
     transactions = 'Your recent transations: ' +'\n'
     for collection in reversed(collections):
         transactions += collection['menu_item'] + " : " + collection['date'] + '\n'
-
     update.message.reply_text(transactions)
