@@ -9,15 +9,14 @@ def create_new_user(username, credits):
 #create_new_user('kaibing', 100)
 
 #Function to create shop and its menu (in list)
-def add_shop(name,items):
-    nameList = []
+def add_shop(name,items,username):
+    products = []
     for i in items:
-        nameList.append(i[0])
-        database.items.insert({'itemName':i[0],'credits':i[1]})
-    database.shops.insert({'name':name,'items':nameList})
+        products.append({'item':i[0],'price':i[1]})
+    database.shops.insert({'username':username,'name':name,'items':products, 'chatid':None, 'location': None})
 
 #ADD STALL + ITEMS CREDITS
-#add_shop('Doodle Noodles',[['Wanton Mee',8],['Curry Chicken Noodles',10],['Ban Mian',12],['Tomyum Noodles',12]])
+add_shop('Western',[['Chicken Chope',7],['Steak',12],['Spaghetti',5]],'kaibing')
 
 ## GET MENU ITEMS
 # shopList = database['shops'].find()
@@ -26,7 +25,7 @@ def add_shop(name,items):
 #         print(j)
 
 #Get credits
-item = database['items'].find({'itemName': 'Cheese Pizza'})
-print(item[0]['credits'])
-for x in item:
-    print(x['credits'])
+# item = database['items'].find({'itemName': 'Cheese Pizza'})
+# print(item[0]['credits'])
+# for x in item:
+#     print(x['credits'])
