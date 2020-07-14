@@ -1,6 +1,6 @@
 # Hungry-No-More
 
-###Set up 
+### Set up 
 Git clone the repo with 
 
 ```
