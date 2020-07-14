@@ -11,7 +11,7 @@ Pip install the requirements
 pip install -r requirements.txt
 ``` 
 
-###Starting the bot 
+### Starting the bot 
 To start the bot, run main.py and find the bot name @HungryNoMorebot on telegram 
 ``` 
 python main.py
