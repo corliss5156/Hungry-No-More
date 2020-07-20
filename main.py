@@ -1,76 +1,71 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackQueryHandler
 from telegram import ReplyKeyboardMarkup
-from pymongo import MongoClient
 import telegram
-from order import order, shops, menu, record 
-from wallet import wallet
+from order import order, shops, menu, record
 from recent_transactions import recent_transactions
-
+from states import *
 import logging
+import UserHandler
+import TransactionHandler
+from settings import API_TOKEN
 
-#Enable logging
+# Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 
-Rules = """ 
-Commands: 
-/start      starts the bot 
-/order      order 
-/wallet     check balance in wallet
-/recent_transactions    check last 5 transactions from wallet 
-""" 
-
-client = MongoClient("""mongodb+srv://Admin:admin123@cluster0-phjwg.mongodb.net/<dbname>?retryWrites=true&w=majority""")
-
-database = client['Cluster0']
-
-CATEGORY, USER, CREATE_NEW_USER, CREDITS = range(0,4)
-SHOPS, MENU,RECORD = range(0,3)
+# Rules = """
+# Commands:
+# /start      starts the bot
+# /user       Enter user menu
+# /transactions Transactions
+# /order      order
+# /recent_transactions    check last 5 transactions from wallet
+# """
 
 
-#Start command
-def Start(update, context):
-    update.message.reply_text(Rules)
+# Start command
+"brief instructions and guide "
 
 
+def start(update, context):
+    username = update.message.chat.username
+    # update.message.reply_text(Rules)
+    reply_keyboard = [['User Management'],
+                      ['Transactions'],
+                      ['Send My Location']
+                      ]
+    update.message.reply_text(
+        f"Welcome {username}! What would you like to do?",
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    return MAIN_SELECT
 
-### Main function
-def main(): 
-    updater = Updater('1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA', use_context=True)
+
+def main():
+    updater = Updater(
+        API_TOKEN, use_context=True)
     dp = updater.dispatcher
 
-    #Ordering handlers
-    order_handler = ConversationHandler(
-    entry_points = [CommandHandler('order', order)], 
-    states = {
-        SHOPS: [MessageHandler(Filters.regex('^(Pizza|Chinese)$'),shops)], 
-        MENU: [MessageHandler(Filters.regex('^'), menu)], 
-        RECORD: [MessageHandler(Filters.regex('^'), record)]
-        }, fallbacks = [CommandHandler('cancel', Start)])
+    # Ordering handlers
+    # order_handler = ConversationHandler(
+    #     entry_points=[CommandHandler('order', order)],
+    #     states={
+    #         SHOPS: [MessageHandler(Filters.regex('^(Pizza|Chinese)$'), shops)],
+    #         MENU: [MessageHandler(Filters.regex('^'), menu)],
+    #         RECORD: [MessageHandler(Filters.regex('^'), record)]
+    #     }, fallbacks=[CommandHandler('cancel', start)])
+    # dp.add_handler(order_handler)
+    # dp.add_handler(CommandHandler("recent_transactions", recent_transactions))
 
-   
-    #Command handlers
-    dp.add_handler(CommandHandler("cancel", Start)) 
-    dp.add_handler(order_handler)
-
-    
-    
-   
-    dp.add_handler(CommandHandler('Start', Start))
-    dp.add_handler(CommandHandler("wallet", wallet)) 
-    dp.add_handler(CommandHandler("recent_transactions", recent_transactions))
-
-
-
-   
-
+    # Command handlers
+    dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(UserHandler.user_handler)
+    dp.add_handler(TransactionHandler.transaction_handler)
     updater.start_polling()
     updater.idle()
 
+
 if __name__ == '__main__':
     main()
-
-
