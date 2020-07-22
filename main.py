@@ -5,6 +5,7 @@ import telegram
 from order import order, shops, menu, record 
 from wallet import wallet
 from recent_transactions import recent_transactions
+from admin import admin,choose,create_new_user,create_new_shop,topup_user_bal,check_user_bal
 
 import logging
 
@@ -27,8 +28,8 @@ client = MongoClient("""mongodb+srv://Admin:admin123@cluster0-phjwg.mongodb.net/
 
 database = client['Cluster0']
 
-CATEGORY, USER, CREATE_NEW_USER, CREDITS = range(0,4)
 SHOPS, MENU,RECORD = range(0,3)
+CHOOSE,NEW_USER,NEW_SHOP,TOP_UP,CHECK_BAL = range(0,5)
 
 
 #Start command
@@ -51,10 +52,21 @@ def main():
         RECORD: [MessageHandler(Filters.regex('^'), record)]
         }, fallbacks = [CommandHandler('cancel', Start)])
 
+    #Admin Settings
+    admin_handler = ConversationHandler(
+    entry_points = [CommandHandler('admin', admin)], 
+    states = {
+        CHOOSE: [MessageHandler(Filters.regex('^'),choose)], 
+        NEW_USER: [MessageHandler(Filters.regex('^'), create_new_user)],
+        NEW_SHOP: [MessageHandler(Filters.regex('^'), create_new_shop)],
+        TOP_UP: [MessageHandler(Filters.regex('^'), topup_user_bal)],
+        CHECK_BAL: [MessageHandler(Filters.regex('^'), check_user_bal)]
+        }, fallbacks = [CommandHandler('cancel', Start)])
    
     #Command handlers
     dp.add_handler(CommandHandler("cancel", Start)) 
     dp.add_handler(order_handler)
+    dp.add_handler(admin_handler)
 
     
     
