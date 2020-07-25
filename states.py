@@ -1,4 +1,4 @@
-# State definitions for ???
+# State definitions for user order
 SHOPS, MENU, RECORD = range(0, 3)
 # State definitions for second level user management
 USER_ACTION, INPUT_USERNAME, INPUT_ROLE, userCONFIRMATION = range(3, 7)

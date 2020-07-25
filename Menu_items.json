@@ -5,11 +5,13 @@
         "Products": [
             {
                 "Item": "Cheese pizza", 
-                "Price": 10 
+                "Price": 10, 
+                "Photo": "https://www.peoplemagazine.co.za/app/uploads/2017/09/cheese-pizza.jpg"   
             }, 
             {
                 "Item": "Mushroom pizza", 
-                "Price": 8
+                "Price": 8, 
+                "Photo": "https://www.peoplemagazine.co.za/app/uploads/2017/09/cheese-pizza.jpg"   
             }
         ]
     }, 

@@ -7,7 +7,8 @@ from telegram import InlineKeyboardButton
 from states import *
 from datetime import datetime
 import main
-import UserHandler
+import UserHandler 
+from order import order, shops, menu, payment
 """
 TransactionHandler mananges trasaction between uses in the system
 
@@ -38,7 +39,8 @@ event handlers
 
 def handle_transaction_menu(update, context):
     username = update.message.chat.username
-    reply_keyboard = [['Make Transaction', 'View Balance'],
+    reply_keyboard = [['Make An Order'],
+                    ['Make A Transaction', 'View Balance'],
                       ['Transaction History', 'QR code'],
                       ['Back']]
 
@@ -51,6 +53,7 @@ def handle_transaction_menu(update, context):
         handle_payee used to handle event for specific telegram user.
         Todo: Implement proximity based payee selection
     """
+
 
 
 def handle_make_transaction(update, context):
@@ -303,8 +306,11 @@ transaction_handler = ConversationHandler(
     entry_points=[MessageHandler(Filters.regex(
         r'Transactions'), handle_transaction_menu)],
     states={
-        TRANSACTION_ACTION: [MessageHandler(Filters.regex('^Make Transaction$'),
+        TRANSACTION_ACTION: [MessageHandler(Filters.regex('^Make An Order$'),
+                                            order),
+                            MessageHandler(Filters.regex('^Make A Transaction$'),
                                             handle_make_transaction),
+
                              MessageHandler(Filters.regex('^View Balance$'),
                                             handle_show_balance),
                              MessageHandler(Filters.regex('^Transaction History$'),
@@ -347,6 +353,11 @@ transaction_handler = ConversationHandler(
                                    MessageHandler(Filters.regex('^Back$'),
                                                   handle_amount)
                                    ],
+        SHOPS: [MessageHandler(Filters.regex('^'), shops)],
+        MENU: [MessageHandler(Filters.regex('^Back$'),order),
+                MessageHandler(Filters.regex('^[\w]+'), menu)],
+        RECORD: [MessageHandler(Filters.regex('^'), payment)],
+
         TRANSACTION_OUTCOME: [MessageHandler(Filters.text,
                                              handle_confirmation)]
 
