@@ -13,4 +13,4 @@ MAIN, MAIN_SELECT = map(
     chr, range(13, 15))
 
 # State definitions for second level inventory management
-SHOP_ACTION, GET_CREDITS, ADD_ITEM = range(15, 18)
+SHOP_ACTION, GET_CREDITS, ADD_ITEM, DELETE_ITEM = range(15, 19)
