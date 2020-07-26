@@ -5,6 +5,7 @@ from states import *
 import logging
 import UserHandler
 import TransactionHandler
+import InventoryHandler
 from settings import API_TOKEN
 
 # Enable logging
@@ -22,6 +23,7 @@ def start(update, context):
     username = update.message.chat.username
     # update.message.reply_text(Rules)
     reply_keyboard = [['User Management'],
+                      ['Shop Management'],
                       ['Transactions'],
                       ['Send My Location']
                       ]
@@ -43,6 +45,7 @@ def main():
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(UserHandler.user_handler)
     dp.add_handler(TransactionHandler.transaction_handler)
+    dp.add_handler(InventoryHandler.shop_handler)
     updater.start_polling()
     updater.idle()
 
