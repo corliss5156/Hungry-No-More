@@ -4,9 +4,12 @@ SHOPS, MENU, RECORD = range(0, 3)
 USER_ACTION, INPUT_USERNAME, INPUT_ROLE, userCONFIRMATION = range(3, 7)
 
 # State definition for second level transaction management
-TRANSACTION_ACTION, TRANSACTION_AMOUNT, TRANSACTION_PAYEE, TRANSACTION_ITEM, TRANSACTION_CONFIRMATION, TRANSACTION_OUTCOME = range(
-    7, 13)
+TRANSACTION_ACTION, TRANSACTION_AMOUNT, TRANSACTION_PAYEE, TRANSACTION_ITEM, TRANSACTION_CONFIRMATION = range(
+    7, 12)
 
-# Meta states
-MAIN, MAIN_SELECT = map(
-    chr, range(13, 15))
+# State definition for second level fund management
+FUND_ACTION, FUND_AMOUNT, FUND_MANAGER, FUND_CONFIRMATION = range(
+    12, 16)
+
+# # Meta states
+MAIN_SELECT = map(chr, range(16, 17))
