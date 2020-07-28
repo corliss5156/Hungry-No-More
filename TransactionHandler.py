@@ -1,14 +1,15 @@
 from db import altDB
 from simple_chalk import chalk
-from settings import database
 from telegram.ext import RegexHandler, ConversationHandler, Filters, MessageHandler
 from telegram.replykeyboardmarkup import ReplyKeyboardMarkup
 from telegram import InlineKeyboardButton
 from states import *
 from datetime import datetime
 import main
-import UserHandler 
 from order import order, shops, menu, payment
+import re
+import UserHandler
+
 """
 TransactionHandler mananges trasaction between uses in the system
 
@@ -17,7 +18,6 @@ Operations
     Read Operations
         updateRunningBalance for User accout
         ReadTransactionHistory
-        ReadAllTransactionHistory
 
     Create Operations
         makeTransaction
@@ -26,11 +26,6 @@ Operations
 
 """
 
-
-"""
-event handlers
-
-"""
 
 """
     # TRANSACTION_PATH 1: MAKE TRANSACTION
@@ -105,10 +100,30 @@ TODO: Item to be selected from a dropdown menu with pagination maybe
 
 def handle_amount(update, context):
     amount = update.message.text
+    pattern = re.compile("^[1-9]\d*$")
+    username = update.message.chat.username
+
     if amount == 'Back':
         amount = context.user_data['amount']
-    message = f"Amount to transfer: {amount} cents. Please specify item ID/Description"
+    if not pattern.match(amount):
+        update.message.reply_text(
+            "Invalid input amount")
+        return handle_transaction_menu(update, context)
 
+    try:
+        balance = checkRunningBalance(username)
+    except Exception as e:
+        update.message.reply_text(
+            "Error: Cannot read current balance at the moment. Please try again later")
+        print(chalk.red("error in transaction handle_amount"))
+        return handle_transaction_menu(update, context)
+
+    if int(amount) > balance:
+        update.message.reply_text(
+            f"Insufficient funds, for transaction. You only have{balance}, please seek an admin for top up or make deposit to fund to your account")
+        return handle_transaction_menu(update, context)
+
+    message = f"Amount to transfer: {amount} cents. Please specify item ID/Description"
     update.message.reply_text(
         message,
         reply_markup=ReplyKeyboardMarkup(build_navigation_keyboard(), one_time_keyboard=True))
@@ -162,7 +177,6 @@ def handle_confirmation(update, context):
         del context.user_data['amount']
         del context.user_data['itemDesc']
 
-    # Todo: Update Cached balance
         try:
             balance = checkRunningBalance(username)
 
@@ -188,7 +202,6 @@ def handle_show_balance(update, context):
     username = update.message.chat.username
 
     try:
-        retrievePastTransactions(username)
         balance = checkRunningBalance(username)
         message = f'Current balance: {balance}'
         # Respond success
@@ -198,7 +211,7 @@ def handle_show_balance(update, context):
 
     except Exception as e:
         print(chalk.red("ERROR: handle_show_balance"))
-        print(chalk.red(e))
+        print(e)
 
 
 """
@@ -233,11 +246,6 @@ def handle_show_history(update, context):
 
 def handle_exit_to_main(update, context):
     main.start(update, context)
-    return ConversationHandler.END
-
-
-def handle_exit_to_transaction_menu(update, context):
-    handle_transaction_menu(update, context)
     return ConversationHandler.END
 
 
@@ -287,9 +295,17 @@ def checkRunningBalance(username):
     amountPaid = list(altDB.Transactions.aggregate([{"$match": {"payer": {"$eq": f"{username}"}}}, {
         "$group": {"_id": '', "amount": {"$sum": '$amount'}}}]))
 
-    amountReceived = altDB.Transactions.aggregate([{"$match": {"payee": {"$eq": f"{username}"}}}, {
-        "$group": {'_id': '', "amount": {"$sum": '$amount'}}}])
-    return int(list(amountReceived)[0]['amount']) - int(list(amountPaid)[0]['amount'])
+    amountReceived = list(altDB.Transactions.aggregate([{"$match": {"payee": {"$eq": f"{username}"}}}, {
+        "$group": {'_id': '', "amount": {"$sum": '$amount'}}}]))
+
+    if not amountPaid and not amountReceived:
+        return 0
+    elif not amountReceived:
+        raise ValueError('Paid more than received')
+    elif not amountPaid:
+        return int(list(amountReceived)[0]['amount'])
+    else:
+        return int(list(amountReceived)[0]['amount']) - int(list(amountPaid)[0]['amount'])
 
 
 def updateTransaction(payer, payee, amount, itemId, datetimeCreated):
@@ -357,10 +373,6 @@ transaction_handler = ConversationHandler(
         MENU: [MessageHandler(Filters.regex('^Back$'),order),
                 MessageHandler(Filters.regex('^[\w]+'), menu)],
         RECORD: [MessageHandler(Filters.regex('^'), payment)],
-
-        TRANSACTION_OUTCOME: [MessageHandler(Filters.text,
-                                             handle_confirmation)]
-
     },
 
     fallbacks=[MessageHandler(Filters.regex(

@@ -4,7 +4,7 @@ from telegram import ReplyKeyboardMarkup
 from pymongo import MongoClient, TEXT, DESCENDING
 from datetime import datetime, timedelta
 import re
-from settings import database, altDB
+from settings import altDB
 import json
 
 bot = telegram.Bot(token="1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA")
