@@ -18,7 +18,7 @@ SHOPS, MENU, RECORD = range(0, 3)
 def Reply_keyboard(store_name):
     reply_keyboard = []
     photos = []
-    for item in database.shops.find({"name":store_name}, {"items": 1}): 
+    for item in altDB.Inventory.find({"name":store_name}, {"items": 1}): 
         for Item in item['items']:
             Menu_item = []
             menu_item = Item['item'] + ' $' + str(Item['price'])
@@ -32,7 +32,7 @@ def Reply_keyboard(store_name):
 
 def order(update, context):
     reply_keyboard = []
-    for store in database.shops.find({}, {"name": 1}): 
+    for store in altDB.Inventory.find({}, {"name": 1}): 
         name = []
         name.append(store['name'])
         reply_keyboard.append(name)
@@ -114,7 +114,7 @@ def payment(update, context):
 
 def seller(buyer, seller, item, date, first_name, last_name):
     print(buyer, seller, item, date, first_name, last_name)
-    seller_info = database.shops.find_one({"name": seller})
+    seller_info = altDB.Inventory.find_one({"name": seller})
     try:
         bot.send_message(chat_id=seller_info['chatid'], text="Incoming order details: \n" + "Username: @" + buyer +
                      "\nCustomer: " + first_name + " " + last_name + "\nItem: " + item + "\nDate: " + date)
