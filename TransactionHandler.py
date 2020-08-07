@@ -180,7 +180,7 @@ def handle_confirmation(update, context):
         try:
             balance = checkRunningBalance(username)
 
-            message = f'Transaction Successful! Current balance: {balance}'
+            message = f'Transaction Successful! Current fund balance: {balance}'
             # Respond success
             update.message.reply_text(
                 message)

@@ -33,7 +33,7 @@ def handle_fund_menu(update, context):
 
 
 def handle_withdrawal(update, context):
-    context.user_data['fund_action'] = 'withdrawal'
+    context.user_data['fund_action'] = 'withdraw'
     update.message.reply_text(
         'You have choose to make a withdrawal from fund. Please specify amount to withdrawal.',
         reply_markup=ReplyKeyboardMarkup(build_navigation_keyboard())
@@ -78,12 +78,12 @@ def handle_amount(update, context):
             "Error: Cannot read current balance at the moment. Please try again later")
         print(chalk.red("error in fund handle_amount"))
         return handle_fund_menu(update, context)
-    if int(amount) > balance and action_type == 'withdrawal':
+    if int(amount) > balance and action_type == 'withdraw':
         update.message.reply_text(
             "Insufficient funds")
         return handle_fund_menu(update, context)
 
-    if context.user_data['fund_action'] == 'withdrawal':
+    if context.user_data['fund_action'] == 'withdraw':
         message = f"Amount to withdraw: {amount} cents. Please specify which admin account to deduct from"
     elif context.user_data['fund_action'] == 'deposit':
         message = f"Amount to deposit: {amount} cents. Please specify which admin account to deposit to"
@@ -127,12 +127,10 @@ def handle_confirmation(update, context):
     action_type = context.user_data['fund_action']
     fund_manager = context.user_data['fund_manager']
     amount = context.user_data['amount']
-
     try:
-
         print('fund transaction successful',
-              chalk.blue(create_fund_transaction(fund_manager, amount, action_type,
-                                                 datetimeCreated=datetime.now(), action_by=action_by)))
+        chalk.blue(create_fund_transaction(fund_manager, amount, action_type,
+                                             datetimeCreated=datetime.now(), action_by=action_by)))
     except Exception as e:
         print(
             chalk.red("Error in fund handle_confirmation, cannot create fund_transaction"))
@@ -153,6 +151,9 @@ def handle_confirmation(update, context):
         del context.user_data['fund_manager']
         del context.user_data['amount']
         del context.user_data['fund_action']
+        message = f'Transaction fail! Error in updating fundDB.'
+        update.message.reply_text(
+            message)
         print(Chalk.red('Error in fund handle_confirmation, cannot update transaction DB'))
         return handle_fund_menu(update, context)
 
@@ -164,7 +165,9 @@ def handle_confirmation(update, context):
             message)
         return handle_exit_to_main(update, context)
     except Exception as e:
-        # Your balance cannot be updated!
+        message = f'Transaction fail! Error in reading balance.'
+        update.message.reply_text(
+            message)
         del context.user_data['fund_manager']
         del context.user_data['amount']
         del context.user_data['fund_action']
@@ -188,6 +191,9 @@ def handle_show_balance(update, context):
         return handle_exit_to_main(update, context)
 
     except Exception as e:
+        message = f'Error: Error in checking fund balance.'
+        update.message.reply_text(
+            message)
         print(chalk.red("ERROR: handle_show_balance"))
         print(e)
 
@@ -224,6 +230,7 @@ Database Operations
 def create_fund_transaction(fund_manager, amount, action_type, datetimeCreated, action_by):
     assert amount >= 0
     assert action_type == 'withdraw' or action_type == 'deposit'
+    print(action_type)
     return altDB.Funds.insert({'fund_manager': fund_manager, 'amount': amount, 'action_type': action_type,
                                'action_by': action_by,  'datetimeCreated': datetimeCreated})
 
