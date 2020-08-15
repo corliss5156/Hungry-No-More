@@ -2,7 +2,14 @@
 
 ###  About
 
-This telegram bot is a means for charities to imburse funds to users. 
+This telegram bot is funds distribution system. It allows user to user transaction and ordering of items via the orders interface.
+
+### Features
+1. CRUD of Users of types `admin`,  `seller`, `consumer`
+2. Transaction between Users.
+3. Checking individual balance.
+4. Imbursing funds to circulation.
+5. Inventory Management and ordering.
 
 ```
 $ git clone https://github.com/orzymandias/telegram-transaction-bot.git
