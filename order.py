@@ -8,8 +8,7 @@ from settings import altDB
 import json
 
 bot = telegram.Bot(token="1202721044:AAGImDDtuW6IIZZVMxm6-65IzJjWFZfngOA")
-with open('Menu_items.json') as json_file:
-    DATA = json.load(json_file)
+
 
 
 SHOPS, MENU, RECORD = range(0, 3)
