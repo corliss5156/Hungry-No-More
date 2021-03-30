@@ -12,7 +12,7 @@ cymem==2.0.3
 DateTime==4.3
 decorator==4.4.2
 distlib==0.3.1
-Django==3.0.7
+Django==3.0.12
 dnspython==1.16.0
 doc2text==0.2.4
 docx==0.2.4
