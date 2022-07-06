@@ -24,7 +24,7 @@ image==1.5.28
 importlib-metadata==1.6.0
 joblib==0.14.1
 kiwisolver==1.2.0
-lxml==4.5.0
+lxml==4.9.1
 matplotlib==3.2.1
 mime==0.1.0
 murmurhash==1.0.2
